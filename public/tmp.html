@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      body {
+        display: flex;
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        word-break: break-all;
+        white-space: break-spaces;
+      }
+      div {
+        position: absolute;
+        word-break: break-all;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      alert(
+        'Двойной клик ЛКМ - Создать новый блок с текстом\nДля перемещения - Наведите на элемент и удерживая, перемещайте\nДля изменения текста, нажмите на блок с тектом\n\nЧтобы закончить редактирование шаблона, закройте окно.',
+      );
+      function px2pon(txt) {
+        var g = txt.matchAll(/(\d+)(\D+)/gm).next();
+        return g.done || g.value.length != 3 ? null : { value: +g.value[1], type: g.value[2] };
+      }
+      var c = 0;
+      function divCreate(x, y, text = '') {
+        var div = document.createElement('div');
+        div.id = +new Date() + c;
+        c++;
+        div.contentEditable = true;
+        div.innerText = text;
+        div.style.top = y + 'px';
+        div.style.left = x + 'px';
+        var moving = false;
+        div.onmousedown = (e) => {
+          if (e.ctrlKey) {
+            moving = {
+              y: e.clientY - px2pon(div.style.top).value,
+              x: e.clientX - px2pon(div.style.left).value,
+            };
+          }
+        };
+        div.onmouseup = () => {
+          moving = false;
+        };
+        function setPos(e) {
+          if (moving) {
+            div.style.top = e.clientY - moving.y + 'px';
+            div.style.left = e.clientX - moving.x + 'px';
+          }
+        }
+        document.body.addEventListener('mousemove', setPos);
+        div.onblur = () => {
+          if (div.innerText == '') {
+            document.body.removeEventListener('mousemove', setPos);
+            div.remove();
+          }
+        };
+
+        document.body.appendChild(div);
+        var ppw = px2pon(div.style.left);
+        var pph = px2pon(div.style.top);
+        div.style.left = ppw.value - div.clientWidth / 2 + ppw.type;
+        div.style.top = pph.value - div.clientHeight / 2 + pph.type;
+      }
+      document.body.ondblclick = (e) => {
+        console.log(e);
+        divCreate(e.clientX, e.clientY, 'Текст');
+      };
+    </script>
+  </body>
+</html>
